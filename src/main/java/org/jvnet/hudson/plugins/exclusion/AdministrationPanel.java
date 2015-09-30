@@ -1,18 +1,11 @@
 package org.jvnet.hudson.plugins.exclusion;
 
 import hudson.Extension;
-import hudson.model.RootAction;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.model.Project;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-
+import hudson.model.RootAction;
 import jenkins.model.Jenkins;
-
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.QueryParameter;
@@ -21,6 +14,11 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.ExportedBean;
 import org.kohsuke.stapler.interceptor.RequirePOST;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * Administration page model object.
@@ -65,19 +63,19 @@ public class AdministrationPanel implements RootAction, StaplerProxy {
         }
 
         // For each resource Job, set build to true if a resource is used
-        for (Entry<String, AbstractBuild<?, ?>> allocation: IdAllocationManager.getAllocations().entrySet()) {
+        for (Entry<String, AbstractBuild<?, ?>> allocation : IdAllocationManager.getAllocations().entrySet()) {
             IdAllocator.updateBuild(allocation.getValue().getProject().getName(), allocation.getKey(), true);
         }
 
         ArrayList<RessourcesMonitor> list = new ArrayList<RessourcesMonitor>(listRessources.size());
-		for (RessourcesMonitor rm : listRessources) {
+        for (RessourcesMonitor rm : listRessources) {
             list.add(new RessourcesMonitor(rm.getJobName(), rm.getRessource(), rm.getBuild()));
         }
 
         return list;
     }
 
-	//Called when we click on "release resource" button
+    //Called when we click on "release resource" button
     @RequirePOST
     @Restricted(NoExternalUse.class) // Exported for view
     public void doFreeResource(StaplerRequest res, StaplerResponse rsp, @QueryParameter("resourceName") String resourceName) throws IOException, InterruptedException {

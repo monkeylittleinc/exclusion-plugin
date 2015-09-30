@@ -3,21 +3,19 @@ package org.jvnet.hudson.plugins.exclusion;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Computer;
+import hudson.model.BuildListener;
 import hudson.model.Executor;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Build step -> Start of critical zone
@@ -26,6 +24,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class CriticalBlockStart extends Builder {
 
+    @Extension
+    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
     public static IdAllocationManager pam = null;
 
     @DataBoundConstructor
@@ -43,7 +43,7 @@ public class CriticalBlockStart extends Builder {
         final List<String> listId = new ArrayList<String>();
         // Add to a list all "variableEnv" (which are added by IdAllocator)
         // Each variableEnv is a resource
-        for (Entry<String, String> e: environment.entrySet()) {
+        for (Entry<String, String> e : environment.entrySet()) {
             String cle = e.getKey();
 
             String name = "variableEnv" + build.getProject().getName();
@@ -56,9 +56,9 @@ public class CriticalBlockStart extends Builder {
         for (String id : listId) {
             DefaultIdType p = new DefaultIdType(id);
 
-           logger.println("[Exclusion] -> Allocating resource : " + id);
+            logger.println("[Exclusion] -> Allocating resource : " + id);
             //Allocating resources
-			// if one is already used, just wait for it to be released
+            // if one is already used, just wait for it to be released
             Id resource = p.allocate(true, build, pam, launcher, listener);
 
             logger.println("[Exclusion] -> Assigned " + resource.get());
@@ -72,8 +72,6 @@ public class CriticalBlockStart extends Builder {
     public String getDisplayName() {
         return "Critical block start";
     }
-    @Extension
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 

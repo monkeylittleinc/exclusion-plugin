@@ -157,97 +157,6 @@ public class ExclusionTest {
     }
 
     @Test
-    public void ommitEndStep() throws Exception {
-        BlockingBuilder blocker = new BlockingBuilder();
-
-        FreeStyleProject waiting = j.createFreeStyleProject("job");
-        waiting.getBuildWrappersList().add(defaultAlocatorForResources("jobs", "resource"));
-        waiting.getBuildersList().add(new CriticalBlockStart());
-        waiting.getBuildersList().add(blocker);
-
-        final QueueTaskFuture<FreeStyleBuild> feature = waiting.scheduleBuild2(0);
-        FreeStyleBuild build = feature.waitForStart();
-        Thread.sleep(1000);
-
-        assertSame(build, IdAllocationManager.getOwnerBuild("RESOURCE"));
-
-        j.assertLogContains("Assigned RESOURCE", build);
-        blocker.event.signal();
-        feature.get();
-
-        assertNull("Resource should be available", IdAllocationManager.getOwnerBuild("RESOURCE"));
-    }
-
-    @Test
-    public void matrixProject() throws Exception {
-        j.jenkins.setNumExecutors(5); // We have enough executors for all configurations
-
-        MatrixProject p = j.createMatrixProject();
-        p.setAxes(new AxisList(new TextAxis(
-                "axis", "a", "b", "c", "d", "e"
-        )));
-        p.getBuildWrappersList().add(defaultAlocatorForResources("job", "resource"));
-        p.getBuildersList().add(new CriticalBlockStart());
-        p.getBuildersList().add(new TestBuilder() {
-            @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-                assertSame(build, IdAllocationManager.getOwnerBuild("RESOURCE"));
-                return true;
-            }
-        });
-
-        j.buildAndAssertSuccess(p);
-        for (char i = 'a'; i <= 'e'; i++) {
-            j.assertBuildStatusSuccess(p.getItem("axis=" + i).getLastBuild());
-        }
-
-        assertNull(IdAllocationManager.getOwnerBuild("RESOURCE"));
-    }
-
-    @Test
-    public void configRoundtrip() throws Exception {
-        FreeStyleProject p = j.createFreeStyleProject("job");
-        final IdAllocator wrapper = defaultAlocatorForResources("job", "resource");
-
-        p.getBuildWrappersList().add(wrapper);
-        p.getBuildersList().add(new CriticalBlockStart());
-        p.getBuildersList().add(new CriticalBlockEnd());
-
-        FreeStyleBuild b1 = j.buildAndAssertSuccess(p);
-
-        j.configRoundtrip((Job<?, ?>) p);
-
-        FreeStyleBuild b2 = j.buildAndAssertSuccess(p);
-
-        j.assertLogContains("Assigned RESOURCE", b1);
-        assertEquals(b1.getLog(), b2.getLog());
-    }
-
-    @Test
-    public void releaseResource() throws Exception {
-        BlockingBuilder blocker = new BlockingBuilder();
-
-        FreeStyleProject p = j.createFreeStyleProject("job");
-        p.getBuildWrappersList().add(defaultAlocatorForResources("job", "resource"));
-        p.getBuildersList().add(new CriticalBlockStart());
-        p.getBuildersList().add(blocker);
-
-        FreeStyleBuild b = p.scheduleBuild2(0).waitForStart();
-        Thread.sleep(1000);
-
-        assertNotNull(IdAllocationManager.getOwnerBuild("RESOURCE"));
-
-        // release via UI
-        WebClient wc = j.createWebClient();
-        HtmlPage adminPage = wc.goTo("administrationpanel");
-        HtmlForm form = adminPage.getFormByName("freeResource");
-        // The only resource is preselected
-        j.submit(form);
-
-        assertNull(IdAllocationManager.getOwnerBuild("RESOURCE"));
-    }
-
-    @Test
     public void multipleSlaves() throws Exception {
         DumbSlave slave = j.createOnlineSlave();
         FreeStyleProject owner = j.createFreeStyleProject("job");
@@ -268,36 +177,7 @@ public class ExclusionTest {
 
         j.assertLogContains("Waiting for resource 'RESOURCE' currently used by 'job #1'", blockedBuild);
     }
-
-    @Test
-    public void testFolder() throws Exception {
-        final BlockingBuilder blocker = new BlockingBuilder();
-        Folder fa = j.jenkins.createProject(Folder.class, "folderA");
-
-        FreeStyleProject owner = fa.createProject(FreeStyleProject.class, "job");
-
-        owner.getBuildWrappersList().add(defaultAlocatorForResources("job", "resource"));
-        owner.getBuildersList().add(new CriticalBlockStart());
-        owner.getBuildersList().add(blocker);
-
-        FreeStyleProject blocked = j.createFreeStyleProject("job");
-        blocked.getBuildWrappersList().add(defaultAlocatorForResources("job", "resource"));
-        blocked.getBuildersList().add(new CriticalBlockStart());
-
-        FreeStyleBuild ob = owner.scheduleBuild2(0).waitForStart();
-        Thread.sleep(1000);
-
-        final QueueTaskFuture<FreeStyleBuild> blockedFeature = blocked.scheduleBuild2(0);
-        FreeStyleBuild bb = blockedFeature.waitForStart();
-        Thread.sleep(1000);
-
-        assertSame(ob, IdAllocationManager.getOwnerBuild("RESOURCE"));
-        j.assertLogContains("Waiting for resource 'RESOURCE' currently used by 'folderA » job #1'", bb);
-        blocker.event.signal();
-        blockedFeature.get();
-        j.assertBuildStatusSuccess(bb);
-    }
-
+    
     private IdAllocator defaultAlocatorForResources(String jobName, String... resources) {
         DefaultIdType[] out = new DefaultIdType[resources.length];
         for (int i = 0; i < resources.length; i++) {

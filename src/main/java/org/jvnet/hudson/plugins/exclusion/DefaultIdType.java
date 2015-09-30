@@ -2,14 +2,12 @@ package org.jvnet.hudson.plugins.exclusion;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-
-import jenkins.model.Jenkins;
-
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Exclusion resource that can be configured per job.

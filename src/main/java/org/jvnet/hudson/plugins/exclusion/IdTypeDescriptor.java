@@ -2,7 +2,6 @@ package org.jvnet.hudson.plugins.exclusion;
 
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
-
 import jenkins.model.Jenkins;
 
 /**
@@ -19,7 +18,7 @@ public abstract class IdTypeDescriptor extends Descriptor<IdType> {
         super();
     }
 
-    public static DescriptorExtensionList<IdType,IdTypeDescriptor> all() {
-        return Jenkins.getInstance().<IdType,IdTypeDescriptor>getDescriptorList(IdType.class);
+    public static DescriptorExtensionList<IdType, IdTypeDescriptor> all() {
+        return Jenkins.getInstance().<IdType, IdTypeDescriptor>getDescriptorList(IdType.class);
     }
 }

@@ -2,9 +2,9 @@ package org.jvnet.hudson.plugins.exclusion;
 
 import hudson.ExtensionPoint;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Describable;
-import hudson.model.AbstractBuild;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -17,6 +17,7 @@ import java.io.Serializable;
  */
 public abstract class IdType implements ExtensionPoint, Describable<IdType>, Serializable {
 
+    private static final long serialVersionUID = 1L;
     public final String name;
 
     protected IdType(String name) {
@@ -34,5 +35,4 @@ public abstract class IdType implements ExtensionPoint, Describable<IdType>, Ser
     public abstract Id allocate(boolean launchAlloc, AbstractBuild<?, ?> build, IdAllocationManager manager, Launcher launcher, BuildListener buildListener) throws IOException, InterruptedException;
 
     public abstract IdTypeDescriptor getDescriptor();
-    private static final long serialVersionUID = 1L;
 }

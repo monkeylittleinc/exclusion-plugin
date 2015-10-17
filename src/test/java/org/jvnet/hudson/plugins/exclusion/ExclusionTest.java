@@ -78,8 +78,8 @@ public class ExclusionTest {
         FreeStyleBuild b = future.waitForStart();
         Thread.sleep(1000);
 
-        assertSame(b, IdAllocationManager.getOwnerBuild("RESOURCE1"));
-        assertSame(b, IdAllocationManager.getOwnerBuild("RESOURCE2"));
+        assertSame(b.getNumber(), IdAllocationManager.getOwnerBuild("RESOURCE1"));
+        assertSame(b.getNumber(), IdAllocationManager.getOwnerBuild("RESOURCE2"));
         j.assertLogContains("Assigned RESOURCE1", b);
         j.assertLogContains("Assigned RESOURCE2", b);
 
@@ -110,22 +110,19 @@ public class ExclusionTest {
         final QueueTaskFuture<FreeStyleBuild> owningFuture = owning.scheduleBuild2(0);
         FreeStyleBuild owningBuild = owningFuture.waitForStart();
         Thread.sleep(1000);
-        assertSame(owningBuild, IdAllocationManager.getOwnerBuild("RESOURCE"));
+        assertSame(owningBuild.getNumber(), IdAllocationManager.getOwnerBuild("RESOURCE"));
 
         FreeStyleBuild waitingBuild = waiting.scheduleBuild2(0).waitForStart();
         Thread.sleep(1000);
-        j.assertLogContains("Waiting for resource 'RESOURCE' currently used by 'a #1'", waitingBuild);
+        j.assertLogContains("Waiting for resource 'RESOURCE' currently used by '1'", waitingBuild);
 
-        WebClient wc = j.createWebClient();
-        HtmlPage page = wc.goTo("administrationpanel");
-        assertTrue(page.asText().contains("b\tRESOURCE"));
 
         blocker.event.signal();
 
         owningFuture.get();
         Thread.sleep(1000);
 
-        assertSame(waitingBuild, IdAllocationManager.getOwnerBuild("RESOURCE"));
+        assertSame(waitingBuild.getNumber(), IdAllocationManager.getOwnerBuild("RESOURCE"));
     }
 
     @Test
@@ -145,7 +142,10 @@ public class ExclusionTest {
         build.getExecutor().interrupt();
 
         feature.get();
+        System.out.println(j.getLog(build));
 
+
+        Integer buildNumber = IdAllocationManager.getOwnerBuild("RESOURCE");
         assertNull("Resource should be available", IdAllocationManager.getOwnerBuild("RESOURCE"));
 
         // Should be available for further builds
@@ -175,7 +175,7 @@ public class ExclusionTest {
         FreeStyleBuild blockedBuild = blocked.scheduleBuild2(0).waitForStart();
         Thread.sleep(1000);
 
-        j.assertLogContains("Waiting for resource 'RESOURCE' currently used by 'job #1'", blockedBuild);
+        j.assertLogContains("Waiting for resource 'RESOURCE' currently used by '1'", blockedBuild);
     }
     
     private IdAllocator defaultAlocatorForResources(String jobName, String... resources) {
@@ -193,12 +193,7 @@ public class ExclusionTest {
 
         @Override
         public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-            try {
-                event.block();
-            } catch (InterruptedException ex) {
-                ex.printStackTrace(listener.getLogger());
-                // Allowed on teardown
-            }
+            event.block();
             return true;
         }
     }

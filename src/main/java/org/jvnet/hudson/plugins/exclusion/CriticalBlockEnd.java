@@ -44,7 +44,7 @@ public class CriticalBlockEnd extends Builder {
         for (Entry<String, String> e : environment.entrySet()) {
             String cle = e.getKey();
             //Only environmental variables from the current job
-            String name = "variableEnv" + build.getProject().getName();
+            String name = "variableEnv" + build.getNumber();
             if (cle.contains(name)) {
                 String valeur = e.getValue();
                 listId.add(valeur);
@@ -57,9 +57,9 @@ public class CriticalBlockEnd extends Builder {
         for (String id : listId) {
 
             DefaultIdType p = new DefaultIdType(id);
-            Id i = p.allocate(false, build, pam, launcher, listener);
-            AbstractBuild<?, ?> absBuild = IdAllocationManager.getOwnerBuild(i.type.name);
-            if (absBuild != null) {
+            Id i = p.allocate(false, build.getNumber(), pam, launcher, listener);
+            Integer buildNumber = IdAllocationManager.getOwnerBuild(i.type.name);
+            if (buildNumber != null) {
                 i.cleanUp();
             }
         }

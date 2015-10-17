@@ -1,7 +1,5 @@
 package org.jvnet.hudson.plugins.exclusion;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
 
@@ -9,7 +7,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -19,7 +16,7 @@ import java.util.WeakHashMap;
  */
 public final class IdAllocationManager {
 
-    private final static Map<String, AbstractBuild<?, ?>> ids = new HashMap<String, AbstractBuild<?, ?>>();
+    private final static Map<String, Integer> ids = new HashMap<String, Integer>();
     private static final Map<Computer, WeakReference<IdAllocationManager>> INSTANCES = new WeakHashMap<Computer, WeakReference<IdAllocationManager>>();
     private final Computer node; // TODO unused
 
@@ -42,16 +39,16 @@ public final class IdAllocationManager {
     }
 
     /*package*/
-    static AbstractBuild<?, ?> getOwnerBuild(String resource) {
+    static Integer getOwnerBuild(String resource) {
         return ids.get(resource);
     }
 
     /*package*/
-    static HashMap<String, AbstractBuild<?, ?>> getAllocations() {
-        return new HashMap<String, AbstractBuild<?, ?>>(ids);
+    static HashMap<String, Integer> getAllocations() {
+        return new HashMap<String, Integer>(ids);
     }
 
-    public synchronized String allocate(AbstractBuild<?, ?> owner, String id, BuildListener buildListener) throws InterruptedException, IOException {
+    public synchronized String allocate(int buildNumber, String id, BuildListener buildListener) throws InterruptedException, IOException {
         PrintStream logger = buildListener.getLogger();
         boolean printed = false;
 
@@ -65,7 +62,7 @@ public final class IdAllocationManager {
         }
 
         // When allocate a resource, add it to the hashmap
-        ids.put(id, owner);
+        ids.put(id, buildNumber);
         return id;
     }
 

@@ -2,7 +2,6 @@ package org.jvnet.hudson.plugins.exclusion;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -23,11 +22,11 @@ public class DefaultIdType extends IdType {
     }
 
     @Override
-    public Id allocate(boolean launchAlloc, AbstractBuild<?, ?> build, final IdAllocationManager manager, Launcher launcher, BuildListener buildListener) throws IOException, InterruptedException {
+    public Id allocate(boolean launchAlloc, Integer buildNumber, final IdAllocationManager manager, Launcher launcher, BuildListener buildListener) throws IOException, InterruptedException {
         final String n;
 
         if (launchAlloc) {
-            n = manager.allocate(build, getFixedId(), buildListener);
+            n = manager.allocate(buildNumber, getFixedId(), buildListener);
         } else {
             n = getFixedId();
         }

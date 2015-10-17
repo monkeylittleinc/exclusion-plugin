@@ -46,7 +46,7 @@ public class CriticalBlockStart extends Builder {
         for (Entry<String, String> e : environment.entrySet()) {
             String cle = e.getKey();
 
-            String name = "variableEnv" + build.getProject().getName();
+            String name = "variableEnv" + build.getNumber();
             if (cle.contains(name)) {
                 String valeur = e.getValue();
                 listId.add(valeur);
@@ -59,7 +59,7 @@ public class CriticalBlockStart extends Builder {
             logger.println("[Exclusion] -> Allocating resource : " + id);
             //Allocating resources
             // if one is already used, just wait for it to be released
-            Id resource = p.allocate(true, build, pam, launcher, listener);
+            Id resource = p.allocate(true, build.getNumber(), pam, launcher, listener);
 
             logger.println("[Exclusion] -> Assigned " + resource.get());
         }

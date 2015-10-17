@@ -11,21 +11,16 @@ import java.util.logging.Logger;
 public class RessourcesMonitor implements Cloneable {
 
     private String ressource;
-    private String jobName;
+    private Integer buildNumber;
     private boolean build = false;
 
-    public RessourcesMonitor(String jobName, String ressource) {
-        this(jobName, ressource, false);
+    public RessourcesMonitor(Integer buildNumber, String ressource) {
+        this(buildNumber, ressource, false);
     }
 
-    public RessourcesMonitor(String jobName, String ressource, boolean build) {
+    public RessourcesMonitor(Integer buildNumber, String ressource, boolean build) {
         this.ressource = ressource;
-        // For spaces, delete %20 from name
-        try {
-            this.jobName = URLDecoder.decode(jobName, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-
-        }
+        this.buildNumber = buildNumber;
         this.build = build;
     }
 
@@ -48,8 +43,8 @@ public class RessourcesMonitor implements Cloneable {
         this.build = build;
     }
 
-    public String getJobName() {
-        return jobName;
+    public Integer getBuildNumber() {
+        return buildNumber;
     }
 
     public String getRessource() {

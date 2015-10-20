@@ -106,17 +106,20 @@ public class IdAllocator extends BuildWrapper {
             @Override
             public boolean tearDown(AbstractBuild abstractBuild, BuildListener buildListener) throws IOException, InterruptedException {
                 PrintStream logger = buildListener.getLogger();
-                logger.println("[Exclusion] -> tear down");
+                logger.println("[Exclusion] -> teardown");
+                logger.printf("[Exclusion] -> %s%n", alloc.toString());
+
                 for(Id p : alloc) {
                     Integer get = IdAllocationManager.getOwnerBuild(p.type.name);
+                    logger.printf("[Exclusion] -> found resource '%s' owned by '%s'%n", p.type.name, get);
                     if(get != null) {
                         logger.println(get);
                         logger.println(abstractBuild.getNumber());
                         if(get.equals(abstractBuild.getNumber())) {
-                            logger.println("[Exclusion] -> Releasing " + p.type.name);
+                            logger.printf("[Exclusion] -> Releasing '%s'%n", p.type.name);
                             p.cleanUp();
                         } else {
-                            logger.println("[Exclusion] -> Not releasing " + p.type.name);
+                            logger.printf("[Exclusion] -> Not releasing '%s'%n", p.type.name);
                         }
                     }
                 }
@@ -144,15 +147,6 @@ public class IdAllocator extends BuildWrapper {
         @Override
         public String getDisplayName() {
             return "Add resource to manage exclusion";
-        }
-
-        @Override
-        public String getHelpFile() {
-            return "/plugin/Exclusion/help.html";
-        }
-
-        public List<IdTypeDescriptor> getIdTypes() {
-            return IdTypeDescriptor.all();
         }
 
         @Override

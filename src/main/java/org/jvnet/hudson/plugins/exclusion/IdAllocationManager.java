@@ -38,30 +38,25 @@ public final class IdAllocationManager {
         return pam;
     }
 
-    /*package*/
     static Integer getOwnerBuild(String resource) {
         return ids.get(resource);
     }
 
-    /*package*/
-    static HashMap<String, Integer> getAllocations() {
-        return new HashMap<String, Integer>(ids);
-    }
-
-    public synchronized String allocate(int buildNumber, String id, BuildListener buildListener) throws InterruptedException, IOException {
+    public synchronized String allocate(Integer buildNumber, String id, BuildListener buildListener) throws InterruptedException, IOException {
         PrintStream logger = buildListener.getLogger();
         boolean printed = false;
 
         while (ids.get(id) != null) {
 
             if (printed == false) {
-                logger.printf("[Exclusion] -> Waiting for resource '%s' currently used by '%s'%n", id, ids.get(id).toString());
+                logger.printf("[Exclusion] -> Waiting for resource '%s' currently used by '%s'%n", id, ids.get(id));
                 printed = true;
             }
             wait(1000);
         }
 
         // When allocate a resource, add it to the hashmap
+        logger.printf("[Exclusion] -> Allocated '%s' to '%s'%n", id, buildNumber);
         ids.put(id, buildNumber);
         return id;
     }

@@ -20,7 +20,7 @@ public abstract class IdType implements ExtensionPoint, Describable<IdType>, Ser
     public final String name;
 
     protected IdType(String name) {
-        this.name = name.toUpperCase();
+        this.name = name;
     }
 
     public final String getFixedId() {

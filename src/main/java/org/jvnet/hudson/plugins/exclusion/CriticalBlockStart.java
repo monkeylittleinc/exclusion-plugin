@@ -56,12 +56,12 @@ public class CriticalBlockStart extends Builder {
         for (String id : listId) {
             DefaultIdType p = new DefaultIdType(id);
 
-            logger.println("[Exclusion] -> Allocating resource : " + id);
+            logger.printf("[Exclusion] -> Allocating resource : %s to %s%n", id, build.getNumber());
             //Allocating resources
             // if one is already used, just wait for it to be released
             Id resource = p.allocate(true, build.getNumber(), pam, launcher, listener);
 
-            logger.println("[Exclusion] -> Assigned " + resource.get());
+            logger.printf("[Exclusion] -> Assigned %s", resource.get());
         }
         if (!listId.isEmpty()) {
             logger.println("[Exclusion] -> Resource allocation complete");

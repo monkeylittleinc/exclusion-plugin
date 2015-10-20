@@ -110,9 +110,13 @@ public class IdAllocator extends BuildWrapper {
                 for(Id p : alloc) {
                     Integer get = IdAllocationManager.getOwnerBuild(p.type.name);
                     if(get != null) {
+                        logger.println(get);
+                        logger.println(abstractBuild.getNumber());
                         if(get.equals(abstractBuild.getNumber())) {
                             logger.println("[Exclusion] -> Releasing " + p.type.name);
                             p.cleanUp();
+                        } else {
+                            logger.println("[Exclusion] -> Not releasing " + p.type.name);
                         }
                     }
                 }
